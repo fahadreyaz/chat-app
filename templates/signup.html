@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Signup</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="{{url_for('static',filename='css/auth.css')}}" rel="stylesheet"/>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+  </head>
+  <body>
+    <form>
+      <input type="text" id="user" placeholder="Username">
+      <input type="password" id="password" placeholder="Password">
+      <input type="password" id="passwordConf" placeholder="Conform password">
+      <button type="button" id="signup">Signup</button>
+      <label id="message"></label>
+      <a href="/login">Login</a>
+    </form>
+
+
+    <script>
+      
+
+    function showMessage(text, className){
+      $('#message').html(text).attr("class", className)
+    }
+    $('#signup').click(function(){
+      username = $('#user').val()
+      password = $('#password').val()
+      passwordConf = $('#passwordConf').val()
+
+      if (username.length > 15){
+        showMessage("Username too long!","error")
+      }else if(username.length < 4){
+        showMessage("Username too short!", "error")
+      }else if(password.length < 8){
+        showMessage("Password too short!", "error")
+      }else if(password.length > 30){
+        showMessage("Password too long!", "error")
+      }else if(password.localeCompare(passwordConf) != 0){
+        showMessage("Passwords don't match!","error")
+      }else{
+        $(this).prop('disabled',true)
+        data = {
+          "username": username,
+          "password": password
+        }
+        $.post('/addUser',data,function(result){
+          $('#signup').prop('disabled',false)
+          if (result == "201"){
+            showMessage("Account created!", "success")
+            window.location.href = '/home'
+          } else{
+            showMessage(result, "error")
+          }
+        })
+      }
+    })
+
+    </script>
+  </body>
+</html>

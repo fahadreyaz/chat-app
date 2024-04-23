@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Login</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="{{url_for('static',filename='css/auth.css')}}" rel="stylesheet"/>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+  </head>
+  <body>
+    <form>
+      <input type="text" id="user" placeholder="Username">
+      <input type="password" id="password" placeholder="Password">
+      <button type="button" id="login">Login</button>
+      <label id="message" class=""></label>
+      <a href="/signup">Create account</a>
+    </form>
+    
+    <script>
+
+
+    function showMessage(text, className){
+      $('#message').html(text).attr("class", className)
+    }
+    function isEmpty(text){
+      return text.localeCompare("") == 0
+    }
+
+    $('#login').click(function(){
+      username = $('#user').val()
+      password = $('#password').val()
+
+      if (isEmpty(username) || isEmpty(password)){
+        showMessage("Please fill all the fields", "error")
+      }
+      else if(username.length>15 || password.length>30){
+        showMessage("Invalid username or password!", "error")
+      }
+      else{
+        $(this).prop('disabled',true)
+        showMessage("Checking info...","process")
+        data = {
+          "username": username,
+          "password": password
+        }
+        $.post('/loginUser', data, function(response){
+          $('#login').prop('disabled', false)
+          if (response.localeCompare('200') == 0){
+            showMessage("Logging you in...", "success")
+            window.location.href = '/home'
+          }else{
+            showMessage(response, "error")
+          }
+        })
+      }
+    })
+
+    </script>
+  </body>
+</html>

@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Home</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="{{url_for('static',filename='css/index.css')}}" rel="stylesheet"/>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+  </head>
+  <body>
+    <nav>
+      <h3>@{{data.username}}</h3>
+      <img src="{{data.pfpUrl}}" alt="">
+    </nav>
+    <div class="container">
+      <input type="text" id="roomId" placeholder="Enter room id">
+      <div class="wrapper">
+        <button class="btn join">Join</button>
+        <button class="btn create">Create</button>
+      </div>
+      <p id="message"></p>
+    </div>
+
+
+    <script>
+
+    username = "{{data.username}}"
+
+    function showMessage(text, status){
+      $("#message").html(text).attr("class", status)
+    }
+
+    function isValidId(id){
+      let regexp = new RegExp('^[a-z0-9_]{4,18}$')
+      return regexp.test(id)
+    }
+
+    function disableButtons(status){
+      $('.btn').prop('disabled', status)
+    }
+    disableButtons(false)
+
+    $('.join').click(function(){
+      $('#message').html("")
+      code = $('#roomId').val()
+      if (code.length > 18 || code.length < 4){
+        showMessage("Code must be 4-18 characters long", "error")
+      }else if(!(isValidId(code))){
+        showMessage("Only lowercase alphanumeric characters allowed", "error")
+      }else{
+        data = {
+          "code": code
+        }
+        disableButtons(true)
+        showMessage("Serching room....", "process")
+        $.post('/joinRoom/', data, function(response){
+          disableButtons(false)
+          if (response.localeCompare("200") == 0){
+            window.location.href = '/rooms/'+code
+          }else{
+            showMessage(response, "error")
+          }
+        })
+      }
+    })
+
+    $('.create').click(function(){
+      $('#message').html("")
+      code = $('#roomId').val()
+      if (isValidId(code)){
+        data = {
+          "code": code,
+          "creator": username
+        }
+        disableButtons(false)
+        showMessage("Creating room...", "process")
+        $.post('/createRoom/', data, function(response){
+          if (response.localeCompare("201") == 0){
+            window.location.href = "/rooms/"+code
+          }else{
+            showMessage("Room already exists!", "error")
+          }
+        })
+      }else{
+        showMessage("Invalid room id!", "error")
+      }
+    })
+
+    </script>
+  </body>
+</html>
+
